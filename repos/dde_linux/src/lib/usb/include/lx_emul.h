@@ -21,18 +21,18 @@
 #include <stdarg.h>
 #include <base/fixed_stdint.h>
 
-#define DEBUG_COMPLETION 0
+#define DEBUG_COMPLETION 1
 #define DEBUG_DMA        0
-#define DEBUG_DRIVER     0
+#define DEBUG_DRIVER     1
 #define DEBUG_IRQ        0
 #define DEBUG_KREF       0
-#define DEBUG_PRINTK     0
+#define DEBUG_PRINTK     1
 #define DEBUG_PCI        0
 #define DEBUG_SKB        0
 #define DEBUG_SLAB       0
 #define DEBUG_TIMER      0
 #define DEBUG_THREAD     0
-#define DEBUG_TRACE      0
+#define DEBUG_TRACE      1
 
 #define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
 #define LINUX_VERSION_CODE KERNEL_VERSION(3,9,0)
@@ -614,6 +614,10 @@ static inline size_t min(size_t a, size_t b) {
 	(((x) + (__y - 1)) / __y) * __y;                \
 })
 
+#define __round_mask(x, y) ((__typeof__(x))((y)-1))
+#define round_up(x, y) ((((x)-1) | __round_mask(x, y))+1)
+#define round_down(x, y) ((x) & ~__round_mask(x, y))
+
 #define clamp_val(val, min, max) ({             \
         typeof(val) __val = (val);              \
         typeof(val) __min = (min);              \
@@ -1144,9 +1148,11 @@ void mdelay(unsigned long usecs);
 
 extern unsigned long loops_per_jiffy;  /* needed by 'dwc_otg_attr.c' */
 
+void usleep_range(unsigned long min, unsigned long max);
+
 
 /***********************
- ** linux/workquque.h **
+ ** linux/workqueue.h **
  ***********************/
 
 struct work_struct;
@@ -1218,7 +1224,7 @@ struct workqueue_struct *create_singlethread_workqueue(char *n);
 void destroy_workqueue(struct workqueue_struct *wq);
 
 bool queue_work(struct workqueue_struct *wq, struct work_struct *work);
-
+void flush_workqueue(struct workqueue_struct *wq);
 
 /******************
  ** linux/wait.h **
@@ -2163,10 +2169,19 @@ enum { SIGIO =  29 };
  ** linux/seq_file.h **
  **********************/
 
-struct seq_file { int dummy; };
+struct seq_file { 
+	int dummy;
+	void *private; /* needed by 'chipidea/debug.c' */
+ };
 
 int seq_printf(struct seq_file *, const char *, ...);
 int seq_putc(struct seq_file *, char);
+
+/* all needed by chipidea/debug.c */
+ssize_t seq_read(struct file *, char __user *, size_t, loff_t *);
+loff_t seq_lseek(struct file *, loff_t, int);
+int single_release(struct inode *, struct file *);
+int single_open(struct file *, int (*)(struct seq_file *, void *), void *);
 
 /*****************
  ** linux/gfp.h **
@@ -2263,6 +2278,9 @@ void *phys_to_virt(unsigned long address);
 #define readl(addr) (*(volatile uint32_t *)(addr))
 #define readb(addr) (*(volatile uint8_t  *)(addr))
 
+#define ioread32(addr)          readl(addr)
+#define iowrite32(v, addr)      writel((v), (addr))
+
 void outb(u8  value, u32 port);
 void outw(u16 value, u32 port);
 void outl(u32 value, u32 port);
@@ -2327,6 +2345,8 @@ int request_irq(unsigned int irq, irq_handler_t handler, unsigned long flags,
                 const char *name, void *dev);
 void free_irq(unsigned int, void *);
 
+void enable_irq(unsigned int irq);
+void disable_irq_nosync(unsigned int irq);
 
 /*****************
  ** linux/irq.h **
@@ -3761,20 +3781,23 @@ typedef enum {
 } phy_interface_t;
 
 
-/************************
- ** linux/usb/gadget.h **
- ************************/
-
-struct usb_ep { };
-struct usb_request { };
-struct usb_gadget { };
-
-
 /****************
  ** linux/of.h **
  ****************/
 
 bool of_property_read_bool(const struct device_node *np, const char *propname);
+void *of_get_property(const struct device_node *node, const char *name, int *lenp);
+void of_node_put(struct device_node *node);
+struct property *of_find_property(const struct device_node *np, const char *name, int *lenp);
+
+#define MAX_PHANDLE_ARGS 8
+struct of_phandle_args {
+        struct device_node *np;
+        int args_count;
+        uint32_t args[MAX_PHANDLE_ARGS];
+};
+
+int of_parse_phandle_with_args(const struct device_node *np, const char *list_name, const char *cells_name, int index, struct of_phandle_args *out_args);
 
 
 /************************

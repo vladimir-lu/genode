@@ -776,7 +776,6 @@ int device_add(struct device *dev)
 			if (!ret)
 				return 0;
 		}
-
 	return 0;
 }
 
@@ -839,7 +838,6 @@ void *dev_get_platdata(const struct device *dev)
 {
 	return (void *)dev->platform_data;
 }
-
 
 /*******************************
  ** linux/byteorder/generic.h **
@@ -919,6 +917,13 @@ void udelay(unsigned long usecs)
 void msleep(unsigned int msecs) { _timer.msleep(msecs); }
 void mdelay(unsigned long msecs) { msleep(msecs); }
 
+void usleep_range(unsigned long min, unsigned long max)
+{
+	udelay(min);
+
+	// FIXME - not sure if needed, let's see
+	// Lx::scheduler().current()->schedule();
+}
 
 /*********************
  ** linux/jiffies.h **

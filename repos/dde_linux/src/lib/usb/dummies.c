@@ -188,7 +188,7 @@ void set_timer_slack(struct timer_list *time, int slack_hz) { TRACE; }
 
 
 /***********************
- ** linux/workquque.h **
+ ** linux/workqueue.h **
  ***********************/
 
 bool cancel_work_sync(struct work_struct *work) { TRACE; return 0; }
@@ -196,7 +196,6 @@ int cancel_delayed_work_sync(struct delayed_work *work) { TRACE; return 0; }
 
 bool flush_work(struct work_struct *work) { TRACE; return 0; }
 bool flush_work_sync(struct work_struct *work) { TRACE; return 0; }
-
 
 /******************
  ** linux/time.h **
@@ -389,6 +388,11 @@ void devres_free(void *res) { TRACE; }
 
 void devm_kfree(struct device *dev, void *p) { TRACE; }
 
+/********************************
+ ** drivers/regulator/devres.h **
+ ********************************/
+
+struct regulator *devm_regulator_get(struct device *dev, const char *id) { TRACE; return NULL; }
 
 /*****************************
  ** linux/platform_device.h **
@@ -487,7 +491,10 @@ struct dentry *lookup_one_len(const char *c, struct dentry *e, int v) { TRACE; r
 
 int seq_printf(struct seq_file *f, const char *fmt, ...) { TRACE; return 0; }
 int seq_putc(struct seq_file *f, char c) { TRACE; return 0;}
-
+ssize_t seq_read(struct file *f, char __user *c, size_t s, loff_t *t) { TRACE; return 0;}
+loff_t seq_lseek(struct file *f, loff_t off, int z) { TRACE; return 0; }
+int single_release(struct inode *i, struct file *f) { TRACE; return 0; }
+int single_open(struct file *f, int (*show)(struct seq_file *, void *), void *data) { TRACE; return 0; }
 
 /*****************
  ** linux/gfp.h **
@@ -573,7 +580,8 @@ struct resource *request_mem_region(resource_size_t start, resource_size_t n,
 void local_irq_enable(void) { TRACE; }
 void local_irq_disable(void) { TRACE; }
 void free_irq(unsigned int i, void *p) { TRACE; }
-
+void enable_irq(unsigned int irq) { TRACE; }
+void disable_irq_nosync(unsigned int irq) { TRACE; }
 
 /*********************
  ** linux/hardirq.h **
@@ -1067,7 +1075,7 @@ struct usb_phy *devm_usb_get_phy_dev(struct device *dev, u8 index) { TRACE; retu
 
 struct usb_phy *usb_get_phy_dev(struct device *dev, u8 index) { TRACE; return 0; }
 void   usb_put_phy(struct usb_phy *x) { TRACE; }
-
+struct usb_phy *usb_get_phy(enum usb_phy_type type) { TRACE; return NULL; }
 
 /****************
  ** linux/of.h **
@@ -1076,10 +1084,24 @@ void   usb_put_phy(struct usb_phy *x) { TRACE; }
 struct of_dev_auxdata;
 bool     of_property_read_bool(const struct device_node *np, const char *propname) { TRACE; return false; }
 unsigned of_usb_get_maximum_speed(struct device_node *np) { TRACE; return 0; }
-unsigned of_usb_get_dr_mode(struct device_node *np) { TRACE; return 0; }
 int      of_platform_populate(struct device_node *root, const struct of_device_id *matches,
                               const struct of_dev_auxdata *lookup, struct device *parent) { TRACE; return 0; }
 int      of_device_is_compatible(const struct device_node *device, const char *compat) { TRACE; return 1; }
+
+void     *of_get_property(const struct device_node *node, const char *name, int *lenp) { TRACE; return NULL; }
+
+int of_parse_phandle_with_args(const struct device_node *np, const char *list_name, const char *cells_name, int index, struct of_phandle_args *out_args) { TRACE; return 1; }
+void of_node_put(struct device_node *node) { TRACE; }
+struct property *of_find_property(const struct device_node *np, const char *name, int *lenp) { TRACE; return NULL; }
+
+const struct of_device_id *of_match_device(const struct of_device_id *matches, const struct device *dev) { TRACE; return matches; }
+
+/******************************
+ ** linux/usb/of.h **
+ ******************************/
+
+enum usb_phy_interface of_usb_get_phy_mode(struct device_node *np) { TRACE; return USBPHY_INTERFACE_MODE_UNKNOWN; }
+
 
 
 /******************************

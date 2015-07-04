@@ -132,6 +132,13 @@ void   regulator_put(struct regulator *regulator);
 struct regulator *regulator_get(struct device *dev, const char *id);
 
 
+/********************************
+ ** drivers/regulator/devres.h **
+ ********************************/
+
+struct regulator *devm_regulator_get(struct device *dev, const char *id);
+
+
 /*******************************************
  ** arch/arm/plat-omap/include/plat/usb.h **
  *******************************************/
@@ -181,6 +188,17 @@ int      of_device_is_compatible(const struct device_node *device,
                                  const char *);
 
 
+/******************************
+ ** linux/usb/of.h **
+ ******************************/
+
+// FIXME - ugh!
+
+#include <linux/usb/ch9.h>
+#include <linux/usb/phy.h>
+
+enum usb_phy_interface of_usb_get_phy_mode(struct device_node *np);
+
 /*************************
  ** linux/of_platform.h **
  *************************/
@@ -189,6 +207,12 @@ struct of_dev_auxdata;
 
 int of_platform_populate(struct device_node *, const struct of_device_id *,
                          const struct of_dev_auxdata *, struct device *);
+
+/***********************
+ ** linux/of_device.h **
+ ***********************/
+
+const struct of_device_id *of_match_device(const struct of_device_id *matches, const struct device *dev);
 
 
 /*********************
@@ -253,7 +277,6 @@ void phy_disconnect(struct phy_device *phydev);
  *******************************/
 
 struct nop_usb_xceiv_platform_data { int type; };
-
 
 /*******************************
  ** linux/usb/samsung_usb_phy **
