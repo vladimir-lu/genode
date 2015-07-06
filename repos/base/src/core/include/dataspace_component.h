@@ -139,6 +139,7 @@ namespace Genode {
 
 			void attached_to(Rm_region *region);
 			void detached_from(Rm_region *region);
+			void detach_from_rm_sessions();
 
 			/**
 			 * Check if dataspace is owned by a specific owner
