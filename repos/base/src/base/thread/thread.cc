@@ -198,7 +198,14 @@ Thread_base::Thread_base(size_t weight, const char *name, size_t stack_size,
 
 Thread_base::~Thread_base()
 {
-	env()->rm_session()->detach(_trace_control);
 	_deinit_platform_thread();
 	_free_context(_context);
+
+	/*
+	 * We have to detach the trace control dataspace last because
+	 * we cannot invalidate the pointer used by the Trace::Logger
+	 * from here and any following RPC call will stumple upon the
+	 * detached trace control dataspace.
+	 */
+	env()->rm_session()->detach(_trace_control);
 }

@@ -139,8 +139,8 @@ void Trace::Logger::init(Thread_capability thread, Cpu_session *cpu_session,
 	thread_cap = thread;
 	cpu        = cpu_session;
 
-	unsigned const index    = cpu_session->trace_control_index(thread);
-	Dataspace_capability ds = cpu_session->trace_control();
+	unsigned const index    = cpu->trace_control_index(thread);
+	Dataspace_capability ds = cpu->trace_control();
 	size_t size             = Dataspace_client(ds).size();
 	if ((index + 1)*sizeof(Trace::Control) > size) {
 		PERR("thread control index is out of range");
