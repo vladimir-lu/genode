@@ -139,6 +139,10 @@ namespace Genode {
 
 			void attached_to(Rm_region *region);
 			void detached_from(Rm_region *region);
+
+			/**
+			 * Detach dataspace from all rm sessions.
+			 */
 			void detach_from_rm_sessions();
 
 			/**
