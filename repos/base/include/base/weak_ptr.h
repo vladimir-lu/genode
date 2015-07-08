@@ -15,6 +15,7 @@
 #define _INCLUDE__BASE__WEAK_PTR_H_
 
 #include <base/lock.h>
+#include <base/printf.h>
 #include <util/list.h>
 
 namespace Genode {
@@ -135,6 +136,13 @@ class Genode::Weak_object_base
 		 * is in destruction progress
 		 */
 		class In_destruction : Exception {};
+
+		~Weak_object_base()
+		{
+			if (_list.first())
+				PERR("Weak object %p not destructed properly "
+				     "there are still dangling pointers to it", this);
+		}
 
 		void disassociate(Weak_ptr_base *ptr)
 		{
