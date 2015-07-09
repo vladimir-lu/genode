@@ -15,8 +15,17 @@
 #include <cpu.h>
 #include <kernel/pd.h>
 
-void Genode::Cpu::init_virt_kernel(Kernel::Pd * pd) {
-	Cr3::write(Cr3::init((addr_t)pd->translation_table())); }
+void Genode::Cpu::init_virt_kernel(Kernel::Pd * pd)
+{
+	/*
+	 * FixMe: do not remove the print, because the serial constructor accesses
+	 * the Bios Data Area available in the initial translation table set,
+	 * which will be unavailable after Cr3::write.
+	 */
+	PINF("Switch to core's final translation table");
+
+	Cr3::write(Cr3::init((addr_t)pd->translation_table()));
+}
 
 
 void Genode::Cpu::_init_fpu()
