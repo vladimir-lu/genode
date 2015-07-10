@@ -18,9 +18,10 @@
 void Genode::Cpu::init_virt_kernel(Kernel::Pd * pd)
 {
 	/*
-	 * FixMe: do not remove the print, because the serial constructor accesses
-	 * the Bios Data Area available in the initial translation table set,
-	 * which will be unavailable after Cr3::write.
+	 * Please do not remove the PINF(), because the serial constructor requires
+	 * access to the Bios Data Area, which is available in the initial
+	 * translation table set, but not in the final tables used after
+	 * Cr3::write().
 	 */
 	PINF("Switch to core's final translation table");
 
