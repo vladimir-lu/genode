@@ -49,16 +49,13 @@ inline void * operator new(Genode::size_t, void * p) { return p; }
  * pattern, it can declare this class as friend to be able to still use the
  * unmanaged_singleton template.
  */
-class Unmanaged_singleton_constructor
+struct Unmanaged_singleton_constructor
 {
-	public:
-
-		/**
-		 * Call the constructor of 'T' with arguments 'args' at 'dst'
-		 */
-		template <typename T, typename... ARGS>
-		static void call(char * const dst, ARGS... args) {
-			new (dst) T(args...); }
+	/**
+	 * Call the constructor of 'T' with arguments 'args' at 'dst'
+	 */
+	template <typename T, typename... ARGS>
+	static void call(char * const dst, ARGS... args) { new (dst) T(args...); }
 };
 
 /**
