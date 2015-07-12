@@ -14,6 +14,7 @@
 #include <irq_session/connection.h>
 #include <util/mmio.h>
 #include <io_mem_session/connection.h>
+#include <platform_session/connection.h>
 
 #include <platform/platform.h>
 #include <platform.h>
@@ -71,9 +72,10 @@ struct Ehci : Genode::Mmio
 {
 	Ehci(Genode::addr_t const mmio_base) : Mmio(mmio_base)
 	{
-		PDBG("controller mode: %u", read<UsbDeviceMode::ControllerMode>());
 		write<UsbDeviceMode::ControllerMode>(0x3);
-		PDBG("controller mode now: %u", read<UsbDeviceMode::ControllerMode>());
+		if (read<UsbDeviceMode::ControllerMode>() != 0x3) {
+			PDBG("WARNING: unable to set controller mode to host");
+		}
 	}
 
 	struct UsbDeviceMode : Register<0x1a8, 32>
@@ -101,8 +103,11 @@ void platform_hcd_init(Services *services)
 	module_ci_hdrc_imx_driver_init();
 	module_ehci_hcd_init();
 	
-	// FIXME temporary
+	// FIXME temporary before we start with OTG mode
 	set_usb_host_mode();
+
+	// FIXME - USB_HCD clock settings seemingly not needed?
+	//platform.enable(Platform::Session::USB_HCD);
 
 	/* setup EHCI-controller platform device */
 	platform_device *pdev = (platform_device *)kzalloc(sizeof(platform_device), 0);
@@ -117,9 +122,7 @@ void platform_hcd_init(Services *services)
 	static u64 dma_mask = ~(u64)0;
 	pdev->dev.dma_mask = &dma_mask;
 	pdev->dev.coherent_dma_mask = ~0;
-	PDBG("register platform device");
 	platform_device_register(pdev);
-	PDBG("after register platform device");
 }
 
 Genode::Irq_session_capability platform_irq_activate(int irq)
